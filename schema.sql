@@ -40,12 +40,12 @@ CREATE TABLE customer (
 
 /*
 REGEX for phone number
-https://stackoverflow.com/questions/19715303/regex-that-accepts-only-numbers-0-9-and-no-characters
+https://stackoverflow.com/questions/20054770/regex-for-numbers-with-spaces-plus-sign-hyphen-and-brackets
 
 Not all phone numbers are unique (i.e. house numbers)
 */
 CREATE TABLE phone_number (
-    phone_number VARCHAR(20) CHECK (phone_number LIKE '^[0-9]*$'),
+    phone_number VARCHAR(20) CHECK (phone_number LIKE '^\(?\+?[\d\(\-\s\)]+$'),
     FOREIGN KEY (customer_id) REFERENCES customer (person_id),
     PRIMARY KEY (phone_number, customer_id)
 );
@@ -70,11 +70,16 @@ CREATE TABLE publisher (
     city VARCHAR(200) NOT NULL,
     country VARCHAR(75) NOT NULL,
     postcode VARCHAR(25),
-    phone_number VARCHAR(20) CHECK (phone_number LIKE '^[0-9]*$'),
+    phone_number VARCHAR(20) CHECK (phone_number LIKE '^\(?\+?[\d\(\-\s\)]+$'),
     established_date DATE NOT NULL CHECK (established_date <= GetDate()),
     PRIMARY KEY (name)
 );
 
+/**
+ISBN 13 max length: https://www.isbn-international.org/content/what-isbn
+**/
 CREATE TABLE audiobook (
+    ISBN VARCHAR(17) UNIQUE NOT NULL CHECK(ISBN LIKE '^[0-9-]*$'),
+    title VARCHAR(250) NOT NULL,
 
 );
