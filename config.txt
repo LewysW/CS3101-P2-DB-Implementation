@@ -1,0 +1,9 @@
+MuSQL settings:
+
+    MySQL username = locw
+    MySQL hostname = locw.host.cs.st-andrews.ac.uk
+  initial password = p2wi5qYWZf!tu7
+
+Commands to run:
+    - /usr/bin/mysql --defaults-extra-file=/var/cs/mysql/locw/my.cnf -u locw
+    - mysql < schema.sql
