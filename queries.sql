@@ -4,7 +4,8 @@ FROM audiobook WHERE audiobook.ISBN = audiobook_purchases.ISBN)), 0.00) as total
 FROM customer
 NATURAL LEFT JOIN audiobook_purchases
 NATURAL LEFT JOIN person GROUP BY person_id ORDER BY total_spent DESC, full_name ASC;
---Query 2
 
+--Query 2
+SELECT ISBN, title FROM audiobooks WHERE NOT audiobook.ISBN = audiobook_purchases.ISBN;
 
 --Query 3
