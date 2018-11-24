@@ -100,6 +100,12 @@ CREATE TABLE publisher (
     established_date DATE NOT NULL,
     PRIMARY KEY (name)
 );
+LOAD DATA LOCAL INFILE 'data/publisher.csv' INTO TABLE publisher
+    FIELDS TERMINATED BY ','
+    OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 LINES
+    (name,building,street,city,country,postcode,phone_number,established_date);
 
 /**
 ISBN 13 max length: https://www.isbn-international.org/content/what-isbn
@@ -124,6 +130,13 @@ CREATE TABLE audiobook (
     FOREIGN KEY (publisher_name) REFERENCES publisher (name),
     PRIMARY KEY (ISBN)
 );
+LOAD DATA LOCAL INFILE 'data/audiobook.csv' INTO TABLE audiobook
+    FIELDS TERMINATED BY ','
+    OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 LINES
+    (ISBN,title,narrator_id,running_time,age_rating,purchase_price,publisher_name,published_date,audiofile);
+
 
 CREATE TABLE chapter (
     ISBN VARCHAR(17) UNIQUE NOT NULL CHECK (ISBN LIKE '^[0-9-]*$'),
@@ -133,6 +146,13 @@ CREATE TABLE chapter (
     PRIMARY KEY (ISBN, number),
     FOREIGN KEY (ISBN) REFERENCES audiobook (ISBN)
 );
+LOAD DATA LOCAL INFILE 'data/chapter.csv' INTO TABLE chapter
+    FIELDS TERMINATED BY ','
+    OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 LINES
+    (ISBN,number,title,start);
+
 
 CREATE TABLE audiobook_authors (
     contributor_id INTEGER NOT NULL UNIQUE,
@@ -141,6 +161,13 @@ CREATE TABLE audiobook_authors (
     FOREIGN KEY (ISBN) REFERENCES audiobook (ISBN),
     PRIMARY KEY (contributor_id, ISBN)
 );
+LOAD DATA LOCAL INFILE 'data/audiobook_authors.csv' INTO TABLE audiobook_authors
+    FIELDS TERMINATED BY ','
+    OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 LINES
+    (contributor_id,ISBN);
+
 
 CREATE TABLE audiobook_purchases (
     customer_id INTEGER NOT NULL UNIQUE,
@@ -150,6 +177,13 @@ CREATE TABLE audiobook_purchases (
     FOREIGN KEY (ISBN) references audiobook (ISBN),
     PRIMARY KEY (customer_id, ISBN)
 );
+LOAD DATA LOCAL INFILE 'data/audiobook_purchases.csv' INTO TABLE audiobook_purchases
+    FIELDS TERMINATED BY ','
+    OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 LINES
+    (customer_id,ISBN,purchase_date);
+
 
 CREATE TABLE audiobook_reviews (
     customer_id INTEGER NOT NULL UNIQUE,
@@ -162,3 +196,9 @@ CREATE TABLE audiobook_reviews (
     FOREIGN KEY (ISBN) REFERENCES audiobook (ISBN),
     PRIMARY KEY (customer_id, ISBN)
 );
+LOAD DATA LOCAL INFILE 'data/audiobook_reviews.csv' INTO TABLE audiobook_reviews
+    FIELDS TERMINATED BY ','
+    OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 LINES
+    (customer_id,ISBN,rating,title,comment,verified);
