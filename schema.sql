@@ -13,17 +13,29 @@ CREATE TABLE person (
     date_of_birth DATE NOT NULL,
     PRIMARY KEY (id)
 );
+LOAD DATA LOCAL INFILE 'data/person.csv' INTO TABLE person
+    FIELDS TERMINATED BY ','
+    OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 LINES
+    (id,forename,middle_initials,surname,date_of_birth);
 
 /*
 Average word in English is 5 characters long, so 2500 allows a 500 words biography,
 this seems reasonable due to wikipedia summaries being roughly 500 words.
 */
 CREATE TABLE contributor (
-    person_id INTEGER NOT NULL UNIQUE,
-    biography VARCHAR(2500),
+    person_id INTEGER UNIQUE NOT NULL,
+    biography VARCHAR(2500) NOT NULL,
     PRIMARY KEY (person_id),
     FOREIGN KEY (person_id) REFERENCES person (id)
 );
+LOAD DATA LOCAL INFILE 'data/contributor.csv' INTO TABLE contributor
+    FIELDS TERMINATED BY ','
+    OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 LINES
+    (person_id,biography);
 
 /*
 REGEX for email
@@ -33,11 +45,17 @@ Emails can have a maximum length of 320 as the user name can be 64 characters,
 the '@' symbol requires 1 character, and the domain can be 255 characters.
 */
 CREATE TABLE customer (
-    person_id INTEGER NOT NULL UNIQUE,
-    email_address VARCHAR(320) UNIQUE CHECK (email_address LIKE '^[^@]+@[^@]+\.[^@]+$'),
+    person_id INTEGER UNIQUE NOT NULL,
+    email_address VARCHAR(320) NOT NULL UNIQUE,
     FOREIGN KEY (person_id) REFERENCES person (id),
     PRIMARY KEY (person_id)
 );
+LOAD DATA LOCAL INFILE 'data/customer.csv' INTO TABLE customer
+    FIELDS TERMINATED BY ','
+    OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 LINES
+    (person_id,email_address);
 
 /*
 REGEX for phone number
@@ -46,11 +64,17 @@ https://stackoverflow.com/questions/20054770/regex-for-numbers-with-spaces-plus-
 Not all phone numbers are unique (i.e. house numbers)
 */
 CREATE TABLE phone_number (
-    customer_id INTEGER NOT NULL UNIQUE,
-    phone_number VARCHAR(20) CHECK (phone_number LIKE '^\(?\+?[\d\(\-\s\)]+$'),
+    customer_id INTEGER NOT NULL,
+    phone_number VARCHAR(20) NOT NULL,
     PRIMARY KEY (phone_number, customer_id),
     FOREIGN KEY (customer_id) REFERENCES customer (person_id)
 );
+LOAD DATA LOCAL INFILE 'data/phone_number.csv' INTO TABLE phone_number
+    FIELDS TERMINATED BY ','
+    OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 LINES
+    (customer_id,phone_number);
 
 /*
 Longest company name in UK (160 characters):
@@ -72,7 +96,7 @@ CREATE TABLE publisher (
     city VARCHAR(200) NOT NULL,
     country VARCHAR(75) NOT NULL,
     postcode VARCHAR(25),
-    phone_number VARCHAR(20) CHECK (phone_number LIKE '^\(?\+?[\d\(\-\s\)]+$'),
+    phone_number VARCHAR(20),
     established_date DATE NOT NULL,
     PRIMARY KEY (name)
 );
