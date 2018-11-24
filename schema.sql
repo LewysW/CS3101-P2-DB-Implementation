@@ -6,31 +6,31 @@ USE locw_bookstream;
 
 --Suggested name length:https://stackoverflow.com/questions/30485/what-is-a-reasonable-length-limit-on-person-name-fields
 CREATE TABLE person (
-    id INTEGER UNIQUE NOT NULL AUTO_INCREMENT,
+    person_id INTEGER UNIQUE NOT NULL AUTO_INCREMENT,
     forename VARCHAR(50) NOT NULL,
     middle_initials VARCHAR(10),
     surname VARCHAR(50) NOT NULL,
     date_of_birth DATE NOT NULL,
-    PRIMARY KEY (id)
+    PRIMARY KEY (person_id)
 );
-LOAD DATA LOCAL INFILE 'data/person.csv' INTO TABLE person
+LOAD DATA LOCAL INFILE 'data/persons.csv' INTO TABLE person
     FIELDS TERMINATED BY ','
     OPTIONALLY ENCLOSED BY '"'
     LINES TERMINATED BY '\n'
     IGNORE 1 LINES
-    (id,forename,middle_initials,surname,date_of_birth);
+    (person_id,forename,middle_initials,surname,date_of_birth);
 
 /*
 Average word in English is 5 characters long, so 2500 allows a 500 words biography,
 this seems reasonable due to wikipedia summaries being roughly 500 words.
 */
 CREATE TABLE contributor (
-    person_id INTEGER UNIQUE NOT NULL,
+    person_id INTEGER,
     biography VARCHAR(2500) NOT NULL,
-    PRIMARY KEY (person_id),
-    FOREIGN KEY (person_id) REFERENCES person (id)
+    FOREIGN KEY (person_id) REFERENCES person (person_id),
+    PRIMARY KEY (person_id)
 );
-LOAD DATA LOCAL INFILE 'data/contributor.csv' INTO TABLE contributor
+LOAD DATA LOCAL INFILE 'data/contributors.csv' INTO TABLE contributor
     FIELDS TERMINATED BY ','
     OPTIONALLY ENCLOSED BY '"'
     LINES TERMINATED BY '\n'
@@ -45,12 +45,12 @@ Emails can have a maximum length of 320 as the user name can be 64 characters,
 the '@' symbol requires 1 character, and the domain can be 255 characters.
 */
 CREATE TABLE customer (
-    person_id INTEGER UNIQUE NOT NULL,
-    email_address VARCHAR(320) NOT NULL UNIQUE,
-    FOREIGN KEY (person_id) REFERENCES person (id),
+    person_id INTEGER,
+    email_address VARCHAR(320) NOT NULL UNIQUE CHECK (email_address RLIKE '^[^@]+@[^@]+\.[^@]+$'),
+    FOREIGN KEY (person_id) REFERENCES person (person_id),
     PRIMARY KEY (person_id)
 );
-LOAD DATA LOCAL INFILE 'data/customer.csv' INTO TABLE customer
+LOAD DATA LOCAL INFILE 'data/customers.csv' INTO TABLE customer
     FIELDS TERMINATED BY ','
     OPTIONALLY ENCLOSED BY '"'
     LINES TERMINATED BY '\n'
@@ -58,23 +58,20 @@ LOAD DATA LOCAL INFILE 'data/customer.csv' INTO TABLE customer
     (person_id,email_address);
 
 /*
-REGEX for phone number
-https://stackoverflow.com/questions/20054770/regex-for-numbers-with-spaces-plus-sign-hyphen-and-brackets
-
-Not all phone numbers are unique (i.e. house numbers)
+Not all phone numbers are unique to a single person (i.e. house numbers)
 */
 CREATE TABLE phone_number (
-    customer_id INTEGER NOT NULL,
-    phone_number VARCHAR(20) NOT NULL,
-    PRIMARY KEY (phone_number, customer_id),
-    FOREIGN KEY (customer_id) REFERENCES customer (person_id)
+    person_id INTEGER,
+    phone_number VARCHAR(20) NOT NULL CHECK (phone_number RLIKE '[\+0-9()\-\s]$'),
+    FOREIGN KEY (person_id) REFERENCES customer (person_id),
+    PRIMARY KEY (phone_number, person_id)
 );
-LOAD DATA LOCAL INFILE 'data/phone_number.csv' INTO TABLE phone_number
+LOAD DATA LOCAL INFILE 'data/phone_numbers.csv' INTO TABLE phone_number
     FIELDS TERMINATED BY ','
     OPTIONALLY ENCLOSED BY '"'
     LINES TERMINATED BY '\n'
     IGNORE 1 LINES
-    (customer_id,phone_number);
+    (person_id,phone_number);
 
 /*
 Longest company name in UK (160 characters):
@@ -90,17 +87,17 @@ Some countries don't have postcodes so can be NULL. The U.S. and Saudi Arabia
 have quite long postcodes so 25 characters has been allowed
 */
 CREATE TABLE publisher (
-    name VARCHAR(200) UNIQUE NOT NULL,
+    name VARCHAR(200),
     building VARCHAR(75) NOT NULL,
     street VARCHAR(75),
     city VARCHAR(200) NOT NULL,
     country VARCHAR(75) NOT NULL,
     postcode VARCHAR(25),
-    phone_number VARCHAR(20),
+    phone_number VARCHAR(20) CHECK (phone_number RLIKE '[\+0-9()\-\s]$'),
     established_date DATE NOT NULL,
     PRIMARY KEY (name)
 );
-LOAD DATA LOCAL INFILE 'data/publisher.csv' INTO TABLE publisher
+LOAD DATA LOCAL INFILE 'data/publishers.csv' INTO TABLE publisher
     FIELDS TERMINATED BY ','
     OPTIONALLY ENCLOSED BY '"'
     LINES TERMINATED BY '\n'
@@ -117,36 +114,36 @@ Chose LONGBLOB to allow for audio book files up to 4GB (e.g. the bible on audibl
 which is 65 hours long)
 **/
 CREATE TABLE audiobook (
-    ISBN VARCHAR(17) UNIQUE NOT NULL CHECK (ISBN LIKE '^[0-9-]*$'),
+    ISBN VARCHAR(17) CHECK (ISBN RLIKE '[0-9\-]$'),
     title VARCHAR(250) NOT NULL,
-    narrator_id INTEGER UNIQUE NOT NULL,
+    person_id INTEGER NOT NULL,
     running_time TIME NOT NULL CHECK (running_time > 0),
     age_rating INTEGER CHECK (age_rating >= 0),
     purchase_price FLOAT(10,2) NOT NULL DEFAULT 0,
-    publisher_name VARCHAR(200) UNIQUE NOT NULL,
+    publisher_name VARCHAR(200) NOT NULL,
     published_date DATE NOT NULL,
     audiofile LONGBLOB NOT NULL,
-    FOREIGN KEY (narrator_id) REFERENCES contributor (person_id),
+    FOREIGN KEY (person_id) REFERENCES contributor (person_id),
     FOREIGN KEY (publisher_name) REFERENCES publisher (name),
     PRIMARY KEY (ISBN)
 );
-LOAD DATA LOCAL INFILE 'data/audiobook.csv' INTO TABLE audiobook
+LOAD DATA LOCAL INFILE 'data/audiobooks.csv' INTO TABLE audiobook
     FIELDS TERMINATED BY ','
     OPTIONALLY ENCLOSED BY '"'
     LINES TERMINATED BY '\n'
     IGNORE 1 LINES
-    (ISBN,title,narrator_id,running_time,age_rating,purchase_price,publisher_name,published_date,audiofile);
+    (ISBN,title,person_id,running_time,age_rating,purchase_price,publisher_name,published_date,audiofile);
 
 
 CREATE TABLE chapter (
-    ISBN VARCHAR(17) UNIQUE NOT NULL CHECK (ISBN LIKE '^[0-9-]*$'),
-    number INTEGER NOT NULL,
+    ISBN VARCHAR(17) CHECK (ISBN RLIKE '[0-9\-]$'),
+    number INTEGER,
     title VARCHAR(250) NOT NULL,
     start TIME NOT NULL CHECK (start >= 0),
-    PRIMARY KEY (ISBN, number),
-    FOREIGN KEY (ISBN) REFERENCES audiobook (ISBN)
+    FOREIGN KEY (ISBN) REFERENCES audiobook (ISBN),
+    PRIMARY KEY (ISBN, number)
 );
-LOAD DATA LOCAL INFILE 'data/chapter.csv' INTO TABLE chapter
+LOAD DATA LOCAL INFILE 'data/chapters.csv' INTO TABLE chapter
     FIELDS TERMINATED BY ','
     OPTIONALLY ENCLOSED BY '"'
     LINES TERMINATED BY '\n'
@@ -155,50 +152,50 @@ LOAD DATA LOCAL INFILE 'data/chapter.csv' INTO TABLE chapter
 
 
 CREATE TABLE audiobook_authors (
-    contributor_id INTEGER NOT NULL UNIQUE,
-    ISBN VARCHAR(17) UNIQUE NOT NULL CHECK (ISBN LIKE '^[0-9-]*$'),
-    FOREIGN KEY (contributor_id) REFERENCES contributor (person_id),
+    person_id INTEGER,
+    ISBN VARCHAR(17) NOT NULL CHECK (ISBN RLIKE '[0-9\-]$'),
+    FOREIGN KEY (person_id) REFERENCES contributor (person_id),
     FOREIGN KEY (ISBN) REFERENCES audiobook (ISBN),
-    PRIMARY KEY (contributor_id, ISBN)
+    PRIMARY KEY (person_id, ISBN)
 );
 LOAD DATA LOCAL INFILE 'data/audiobook_authors.csv' INTO TABLE audiobook_authors
     FIELDS TERMINATED BY ','
     OPTIONALLY ENCLOSED BY '"'
     LINES TERMINATED BY '\n'
     IGNORE 1 LINES
-    (contributor_id,ISBN);
+    (person_id,ISBN);
 
 
 CREATE TABLE audiobook_purchases (
-    customer_id INTEGER NOT NULL UNIQUE,
-    ISBN VARCHAR(17) UNIQUE NOT NULL CHECK (ISBN LIKE '^[0-9-]*$'),
+    person_id INTEGER,
+    ISBN VARCHAR(17) CHECK (ISBN RLIKE '[0-9\-]$'),
     purchase_date DATETIME NOT NULL,
-    FOREIGN KEY (customer_id) REFERENCES customer (person_id),
+    FOREIGN KEY (person_id) REFERENCES customer (person_id),
     FOREIGN KEY (ISBN) references audiobook (ISBN),
-    PRIMARY KEY (customer_id, ISBN)
+    PRIMARY KEY (person_id, ISBN)
 );
 LOAD DATA LOCAL INFILE 'data/audiobook_purchases.csv' INTO TABLE audiobook_purchases
     FIELDS TERMINATED BY ','
     OPTIONALLY ENCLOSED BY '"'
     LINES TERMINATED BY '\n'
     IGNORE 1 LINES
-    (customer_id,ISBN,purchase_date);
+    (person_id,ISBN,purchase_date);
 
 
 CREATE TABLE audiobook_reviews (
-    customer_id INTEGER NOT NULL UNIQUE,
-    ISBN VARCHAR(17) UNIQUE NOT NULL CHECK (ISBN LIKE '^[0-9-]*$'),
+    person_id INTEGER,
+    ISBN VARCHAR(17) CHECK (ISBN RLIKE '[0-9\-]$'),
     rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
     title VARCHAR(250),
     comment VARCHAR(2500),
-    verified Boolean NOT NULL,
-    FOREIGN KEY (customer_id) REFERENCES customer (person_id),
+    verified BOOLEAN DEFAULT 0 NOT NULL,
+    FOREIGN KEY (person_id) REFERENCES customer (person_id),
     FOREIGN KEY (ISBN) REFERENCES audiobook (ISBN),
-    PRIMARY KEY (customer_id, ISBN)
+    PRIMARY KEY (person_id, ISBN)
 );
 LOAD DATA LOCAL INFILE 'data/audiobook_reviews.csv' INTO TABLE audiobook_reviews
     FIELDS TERMINATED BY ','
     OPTIONALLY ENCLOSED BY '"'
     LINES TERMINATED BY '\n'
     IGNORE 1 LINES
-    (customer_id,ISBN,rating,title,comment,verified);
+    (person_id,ISBN,rating,title,comment,verified);

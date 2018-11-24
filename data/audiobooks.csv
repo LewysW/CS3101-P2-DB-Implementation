@@ -1,26 +1,6 @@
-ISBN,title,narrator,running_time,age_rating,purchase_price,publisher_name,published_date,chapters,authors
-860-1404211171,Fantastic Beasts and Where to Find Them,Stephen Fry,01:45:00,,12.00,Pottermore Publishing,2017-03-14,,"JK Rowling,
-Newton A F Scamander"
-978-0393957242,Gulliver's Travels,Hugh Laurie,05:35:00,,38.00,Penguin Books Ltd,2012-05-12,"1: Part I: A Voyage to Lilliput: 00:00:00;
-2: Part II: A Voyage to Brobdingnag: 01:40:07;
-3: Part III: A Voyage to Laputa, Balnibarbi, Luggnagg, Glubbdubdrib and Japan: 03:01:09;
-4: Part IV: A Voyage to the Land of the Houyhnhnms: 04:22:05",Jonathan Swift
-978-1408855652,Harry Potter and the Philosopher's Stone,Stephen Fry,08:44:00,,7.19,Pottermore Publishing,2014-09-01,"1: The Boy Who Lived: 00:00:00;
-2: The Vanishing Glass: 00:35:03;
-3: The Letters from No One: 01:07:27;
-4: The Keeper of Keys: 01:38:01;
-5: Diagon Alley: 02:08:25;
-6: The Journey from Platform Nine and Three-Quarters: 02:38:50;
-7: The Sorting Hat: 03:09:43;
-8: The Potions Master: 03:40:03;
-9: The Midnight Due: 04:10:27;
-10: Hallowe'en: 04:40:48;
-11: Quidditch: 05:11:06;
-12: The Mirror of Erised: 05:32:38;
-13: Nicholas Flamel: 06:11:56;
-14: Norbert the Norwegian Ridgeback: 06:52:20;
-15: The Forbidden Forest: 07:12:43;
-16: Through the Trapdoor: 07:43:05;
-17: The Man with Two Faces: 08:15:30",JK Rowling
-978-0099457046,Moab Is My Washpot,Stephen Fry,11:33:00,12,22.00,Random House AudioBooks,2017-01-01,,Stephen Fry
-978-1611749731,The Gun Seller,Simon Prebble,10:45:00,16,16.00,HighBridge Audio,2012-10-16,,Hugh Laurie
+ISBN,title,person_id,running_time,age_rating,purchase_price,publisher_name,published_date,audiofile
+860-1404211171,"Fantastic Beasts and Where to Find Them",3,01:45:00,,12.00,"Pottermore Publishing",2017-03-14,,
+978-0393957242,"Gulliver's Travels",4,05:35:00,,38.00,"Penguin Books Ltd",2012-05-12,,
+978-1408855652,"Harry Potter and the Philosopher's Stone",3,08:44:00,,7.19,"Pottermore Publishing",2014-09-01,,
+978-0099457046,"Moab Is My Washpot",3,11:33:00,12,22.00,"Random House AudioBooks",2017-01-01,,
+978-1611749731,"The Gun Seller",6,10:45:00,16,16.00,"HighBridge Audio",2012-10-16,,

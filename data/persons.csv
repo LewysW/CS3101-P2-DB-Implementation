@@ -1,4 +1,4 @@
-forename,middle_initials,date_of_birth
+id,forename,middle_initials,surname,date_of_birth
 1,"Bob","B A","Bobson",2009-12-31
 2,"Bob","A B","Bobson",1978-10-23
 3,"Stephen",,"Fry",1957-08-24
