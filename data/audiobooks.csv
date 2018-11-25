@@ -1,4 +1,4 @@
-ISBN,title,person_id,running_time,age_rating,purchase_price,publisher_name,published_date,audiofile
+ISBN,title,narrator_id,running_time,age_rating,purchase_price,publisher_name,published_date,audiofile
 860-1404211171,"Fantastic Beasts and Where to Find Them",3,01:45:00,,12.00,"Pottermore Publishing",2017-03-14,,
 978-0393957242,"Gulliver's Travels",4,05:35:00,,38.00,"Penguin Books Ltd",2012-05-12,,
 978-1408855652,"Harry Potter and the Philosopher's Stone",3,08:44:00,,7.19,"Pottermore Publishing",2014-09-01,,

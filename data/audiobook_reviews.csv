@@ -1,4 +1,4 @@
-person_id,ISBN,rating,title,comment,verified
+customer_id,ISBN,rating,title,comment,verified
 10,860-1404211171,2,"Not as good as Harry Potter","Never read the book, seen the movie or listened to the audio book but I can tell you right now - its not as good as harry potter",0
 1,860-1404211171,4,"Fantastic Book","Loved listening to this book before bed.",0
 7,978-1408855652,5,"Best audio book EVER!","Best audio book I ever listened to. Stephen Fry does an excellent job reading the superb prose written by a genius author.",1

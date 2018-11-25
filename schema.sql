@@ -6,19 +6,19 @@ USE locw_bookstream;
 
 --Suggested name length:https://stackoverflow.com/questions/30485/what-is-a-reasonable-length-limit-on-person-name-fields
 CREATE TABLE person (
-    person_id INTEGER UNIQUE NOT NULL AUTO_INCREMENT,
+    id INTEGER UNIQUE NOT NULL AUTO_INCREMENT,
     forename VARCHAR(50) NOT NULL,
     middle_initials VARCHAR(10),
     surname VARCHAR(50) NOT NULL,
     date_of_birth DATE NOT NULL,
-    PRIMARY KEY (person_id)
+    PRIMARY KEY (id)
 );
 LOAD DATA LOCAL INFILE 'data/persons.csv' INTO TABLE person
     FIELDS TERMINATED BY ','
     OPTIONALLY ENCLOSED BY '"'
     LINES TERMINATED BY '\n'
     IGNORE 1 LINES
-    (person_id,forename,middle_initials,surname,date_of_birth);
+    (id,forename,middle_initials,surname,date_of_birth);
 
 /*
 Average word in English is 5 characters long, so 2500 allows a 500 words biography,
@@ -27,7 +27,7 @@ this seems reasonable due to wikipedia summaries being roughly 500 words.
 CREATE TABLE contributor (
     person_id INTEGER,
     biography VARCHAR(2500) NOT NULL,
-    FOREIGN KEY (person_id) REFERENCES person (person_id),
+    FOREIGN KEY (person_id) REFERENCES person (id),
     PRIMARY KEY (person_id)
 );
 LOAD DATA LOCAL INFILE 'data/contributors.csv' INTO TABLE contributor
@@ -47,7 +47,7 @@ the '@' symbol requires 1 character, and the domain can be 255 characters.
 CREATE TABLE customer (
     person_id INTEGER,
     email_address VARCHAR(320) NOT NULL UNIQUE CHECK (email_address RLIKE '^[^@]+@[^@]+\.[^@]+$'),
-    FOREIGN KEY (person_id) REFERENCES person (person_id),
+    FOREIGN KEY (person_id) REFERENCES person (id),
     PRIMARY KEY (person_id)
 );
 LOAD DATA LOCAL INFILE 'data/customers.csv' INTO TABLE customer
@@ -61,17 +61,17 @@ LOAD DATA LOCAL INFILE 'data/customers.csv' INTO TABLE customer
 Not all phone numbers are unique to a single person (i.e. house numbers)
 */
 CREATE TABLE phone_number (
-    person_id INTEGER,
+    customer_id INTEGER,
     phone_number VARCHAR(20) NOT NULL CHECK (phone_number RLIKE '[\+0-9()\-\s]$'),
-    FOREIGN KEY (person_id) REFERENCES customer (person_id),
-    PRIMARY KEY (phone_number, person_id)
+    FOREIGN KEY (customer_id) REFERENCES customer (person_id),
+    PRIMARY KEY (phone_number, customer_id)
 );
 LOAD DATA LOCAL INFILE 'data/phone_numbers.csv' INTO TABLE phone_number
     FIELDS TERMINATED BY ','
     OPTIONALLY ENCLOSED BY '"'
     LINES TERMINATED BY '\n'
     IGNORE 1 LINES
-    (person_id,phone_number);
+    (customer_id,phone_number);
 
 /*
 Longest company name in UK (160 characters):
@@ -116,14 +116,14 @@ which is 65 hours long)
 CREATE TABLE audiobook (
     ISBN VARCHAR(17) CHECK (ISBN RLIKE '[0-9\-]$'),
     title VARCHAR(250) NOT NULL,
-    person_id INTEGER NOT NULL,
+    narrator_id INTEGER NOT NULL,
     running_time TIME NOT NULL CHECK (running_time > 0),
     age_rating INTEGER CHECK (age_rating >= 0),
     purchase_price FLOAT(10,2) NOT NULL DEFAULT 0,
     publisher_name VARCHAR(200) NOT NULL,
     published_date DATE NOT NULL,
     audiofile LONGBLOB NOT NULL,
-    FOREIGN KEY (person_id) REFERENCES contributor (person_id),
+    FOREIGN KEY (narrator_id) REFERENCES contributor (person_id),
     FOREIGN KEY (publisher_name) REFERENCES publisher (name),
     PRIMARY KEY (ISBN)
 );
@@ -132,7 +132,7 @@ LOAD DATA LOCAL INFILE 'data/audiobooks.csv' INTO TABLE audiobook
     OPTIONALLY ENCLOSED BY '"'
     LINES TERMINATED BY '\n'
     IGNORE 1 LINES
-    (ISBN,title,person_id,running_time,age_rating,purchase_price,publisher_name,published_date,audiofile);
+    (ISBN,title,narrator_id,running_time,age_rating,purchase_price,publisher_name,published_date,audiofile);
 
 
 CREATE TABLE chapter (
@@ -152,50 +152,50 @@ LOAD DATA LOCAL INFILE 'data/chapters.csv' INTO TABLE chapter
 
 
 CREATE TABLE audiobook_authors (
-    person_id INTEGER,
+    contributor_id INTEGER,
     ISBN VARCHAR(17) NOT NULL CHECK (ISBN RLIKE '[0-9\-]$'),
-    FOREIGN KEY (person_id) REFERENCES contributor (person_id),
+    FOREIGN KEY (contributor_id) REFERENCES contributor (person_id),
     FOREIGN KEY (ISBN) REFERENCES audiobook (ISBN),
-    PRIMARY KEY (person_id, ISBN)
+    PRIMARY KEY (contributor_id, ISBN)
 );
 LOAD DATA LOCAL INFILE 'data/audiobook_authors.csv' INTO TABLE audiobook_authors
     FIELDS TERMINATED BY ','
     OPTIONALLY ENCLOSED BY '"'
     LINES TERMINATED BY '\n'
     IGNORE 1 LINES
-    (person_id,ISBN);
+    (contributor_id,ISBN);
 
 
 CREATE TABLE audiobook_purchases (
-    person_id INTEGER,
+    customer_id INTEGER,
     ISBN VARCHAR(17) CHECK (ISBN RLIKE '[0-9\-]$'),
     purchase_date DATETIME NOT NULL,
-    FOREIGN KEY (person_id) REFERENCES customer (person_id),
+    FOREIGN KEY (customer_id) REFERENCES customer (person_id),
     FOREIGN KEY (ISBN) references audiobook (ISBN),
-    PRIMARY KEY (person_id, ISBN)
+    PRIMARY KEY (customer_id, ISBN)
 );
 LOAD DATA LOCAL INFILE 'data/audiobook_purchases.csv' INTO TABLE audiobook_purchases
     FIELDS TERMINATED BY ','
     OPTIONALLY ENCLOSED BY '"'
     LINES TERMINATED BY '\n'
     IGNORE 1 LINES
-    (person_id,ISBN,purchase_date);
+    (customer_id,ISBN,purchase_date);
 
 
 CREATE TABLE audiobook_reviews (
-    person_id INTEGER,
+    customer_id INTEGER,
     ISBN VARCHAR(17) CHECK (ISBN RLIKE '[0-9\-]$'),
     rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
     title VARCHAR(250),
     comment VARCHAR(2500),
     verified BOOLEAN DEFAULT 0 NOT NULL,
-    FOREIGN KEY (person_id) REFERENCES customer (person_id),
+    FOREIGN KEY (customer_id) REFERENCES customer (person_id),
     FOREIGN KEY (ISBN) REFERENCES audiobook (ISBN),
-    PRIMARY KEY (person_id, ISBN)
+    PRIMARY KEY (customer_id, ISBN)
 );
 LOAD DATA LOCAL INFILE 'data/audiobook_reviews.csv' INTO TABLE audiobook_reviews
     FIELDS TERMINATED BY ','
     OPTIONALLY ENCLOSED BY '"'
     LINES TERMINATED BY '\n'
     IGNORE 1 LINES
-    (person_id,ISBN,rating,title,comment,verified);
+    (customer_id,ISBN,rating,title,comment,verified);
