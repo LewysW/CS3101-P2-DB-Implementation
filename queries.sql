@@ -1,7 +1,7 @@
 --Query 1
 SELECT
     person_id AS customer_id,
-    (SELECT concat(surname, ' ', middle_initials, ' ', forename) FROM person WHERE customer_id = person.id) as full_name,
+    (SELECT concat(surname, ' ', middle_initials, ' ', forename) FROM person WHERE person.id = customer.person_id) as full_name,
     email_address,
     count(purchase_date) as books_purchased,
     COALESCE(SUM((SELECT SUM(purchase_price) FROM audiobook WHERE audiobook.ISBN = audiobook_purchases.ISBN)), 0.00) as total_spent
