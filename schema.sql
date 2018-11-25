@@ -130,7 +130,7 @@ CREATE TABLE audiobook_purchases (
 CREATE TABLE audiobook_reviews (
     customer_id INTEGER,
     ISBN VARCHAR(17) CHECK (ISBN RLIKE '[0-9\-]$'),
-    rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    rating INTEGER NOT NULL,
     title VARCHAR(250),
     comment VARCHAR(2500),
     verified BOOLEAN DEFAULT 0 NOT NULL,
@@ -213,6 +213,9 @@ LOAD DATA LOCAL INFILE 'data/audiobook_reviews.csv' INTO TABLE audiobook_reviews
     IGNORE 1 LINES
     (customer_id,ISBN,rating,title,comment,verified);
 
+/**
+VIEWS OF
+**/
 CREATE VIEW q1 AS
     SELECT
         person_id AS customer_id,
