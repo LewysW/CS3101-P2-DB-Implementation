@@ -13,12 +13,6 @@ CREATE TABLE person (
     date_of_birth DATE NOT NULL,
     PRIMARY KEY (id)
 );
-LOAD DATA LOCAL INFILE 'data/persons.csv' INTO TABLE person
-    FIELDS TERMINATED BY ','
-    OPTIONALLY ENCLOSED BY '"'
-    LINES TERMINATED BY '\n'
-    IGNORE 1 LINES
-    (id,forename,middle_initials,surname,date_of_birth);
 
 /*
 Average word in English is 5 characters long, so 2500 allows a 500 words biography,
@@ -30,12 +24,6 @@ CREATE TABLE contributor (
     FOREIGN KEY (person_id) REFERENCES person (id),
     PRIMARY KEY (person_id)
 );
-LOAD DATA LOCAL INFILE 'data/contributors.csv' INTO TABLE contributor
-    FIELDS TERMINATED BY ','
-    OPTIONALLY ENCLOSED BY '"'
-    LINES TERMINATED BY '\n'
-    IGNORE 1 LINES
-    (person_id,biography);
 
 /*
 REGEX for email
@@ -50,12 +38,6 @@ CREATE TABLE customer (
     FOREIGN KEY (person_id) REFERENCES person (id),
     PRIMARY KEY (person_id)
 );
-LOAD DATA LOCAL INFILE 'data/customers.csv' INTO TABLE customer
-    FIELDS TERMINATED BY ','
-    OPTIONALLY ENCLOSED BY '"'
-    LINES TERMINATED BY '\n'
-    IGNORE 1 LINES
-    (person_id,email_address);
 
 /*
 Not all phone numbers are unique to a single person (i.e. house numbers)
@@ -66,12 +48,6 @@ CREATE TABLE phone_number (
     FOREIGN KEY (customer_id) REFERENCES customer (person_id),
     PRIMARY KEY (phone_number, customer_id)
 );
-LOAD DATA LOCAL INFILE 'data/phone_numbers.csv' INTO TABLE phone_number
-    FIELDS TERMINATED BY ','
-    OPTIONALLY ENCLOSED BY '"'
-    LINES TERMINATED BY '\n'
-    IGNORE 1 LINES
-    (customer_id,phone_number);
 
 /*
 Longest company name in UK (160 characters):
@@ -97,12 +73,6 @@ CREATE TABLE publisher (
     established_date DATE NOT NULL,
     PRIMARY KEY (name)
 );
-LOAD DATA LOCAL INFILE 'data/publishers.csv' INTO TABLE publisher
-    FIELDS TERMINATED BY ','
-    OPTIONALLY ENCLOSED BY '"'
-    LINES TERMINATED BY '\n'
-    IGNORE 1 LINES
-    (name,building,street,city,country,postcode,phone_number,established_date);
 
 /**
 ISBN 13 max length: https://www.isbn-international.org/content/what-isbn
@@ -127,12 +97,6 @@ CREATE TABLE audiobook (
     FOREIGN KEY (publisher_name) REFERENCES publisher (name),
     PRIMARY KEY (ISBN)
 );
-LOAD DATA LOCAL INFILE 'data/audiobooks.csv' INTO TABLE audiobook
-    FIELDS TERMINATED BY ','
-    OPTIONALLY ENCLOSED BY '"'
-    LINES TERMINATED BY '\n'
-    IGNORE 1 LINES
-    (ISBN,title,narrator_id,running_time,age_rating,purchase_price,publisher_name,published_date,audiofile);
 
 
 CREATE TABLE chapter (
@@ -143,13 +107,6 @@ CREATE TABLE chapter (
     FOREIGN KEY (ISBN) REFERENCES audiobook (ISBN),
     PRIMARY KEY (ISBN, number)
 );
-LOAD DATA LOCAL INFILE 'data/chapters.csv' INTO TABLE chapter
-    FIELDS TERMINATED BY ','
-    OPTIONALLY ENCLOSED BY '"'
-    LINES TERMINATED BY '\n'
-    IGNORE 1 LINES
-    (ISBN,number,title,start);
-
 
 CREATE TABLE audiobook_authors (
     contributor_id INTEGER,
@@ -158,12 +115,6 @@ CREATE TABLE audiobook_authors (
     FOREIGN KEY (ISBN) REFERENCES audiobook (ISBN),
     PRIMARY KEY (contributor_id, ISBN)
 );
-LOAD DATA LOCAL INFILE 'data/audiobook_authors.csv' INTO TABLE audiobook_authors
-    FIELDS TERMINATED BY ','
-    OPTIONALLY ENCLOSED BY '"'
-    LINES TERMINATED BY '\n'
-    IGNORE 1 LINES
-    (contributor_id,ISBN);
 
 
 CREATE TABLE audiobook_purchases (
@@ -174,12 +125,6 @@ CREATE TABLE audiobook_purchases (
     FOREIGN KEY (ISBN) references audiobook (ISBN),
     PRIMARY KEY (customer_id, ISBN)
 );
-LOAD DATA LOCAL INFILE 'data/audiobook_purchases.csv' INTO TABLE audiobook_purchases
-    FIELDS TERMINATED BY ','
-    OPTIONALLY ENCLOSED BY '"'
-    LINES TERMINATED BY '\n'
-    IGNORE 1 LINES
-    (customer_id,ISBN,purchase_date);
 
 
 CREATE TABLE audiobook_reviews (
@@ -193,9 +138,99 @@ CREATE TABLE audiobook_reviews (
     FOREIGN KEY (ISBN) REFERENCES audiobook (ISBN),
     PRIMARY KEY (customer_id, ISBN)
 );
+
+/**
+Code to load data from CSV files into database.
+Allows easy modification of data in database
+**/
+LOAD DATA LOCAL INFILE 'data/persons.csv' INTO TABLE person
+    FIELDS TERMINATED BY ','
+    OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 LINES
+    (id,forename,middle_initials,surname,date_of_birth);
+
+LOAD DATA LOCAL INFILE 'data/contributors.csv' INTO TABLE contributor
+    FIELDS TERMINATED BY ','
+    OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 LINES
+    (person_id,biography);
+
+LOAD DATA LOCAL INFILE 'data/customers.csv' INTO TABLE customer
+    FIELDS TERMINATED BY ','
+    OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 LINES
+    (person_id,email_address);
+
+LOAD DATA LOCAL INFILE 'data/phone_numbers.csv' INTO TABLE phone_number
+    FIELDS TERMINATED BY ','
+    OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 LINES
+    (customer_id,phone_number);
+
+LOAD DATA LOCAL INFILE 'data/publishers.csv' INTO TABLE publisher
+    FIELDS TERMINATED BY ','
+    OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 LINES
+    (name,building,street,city,country,postcode,phone_number,established_date);
+
+LOAD DATA LOCAL INFILE 'data/audiobooks.csv' INTO TABLE audiobook
+    FIELDS TERMINATED BY ','
+    OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 LINES
+    (ISBN,title,narrator_id,running_time,age_rating,purchase_price,publisher_name,published_date,audiofile);
+
+LOAD DATA LOCAL INFILE 'data/chapters.csv' INTO TABLE chapter
+    FIELDS TERMINATED BY ','
+    OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 LINES
+    (ISBN,number,title,start);
+
+LOAD DATA LOCAL INFILE 'data/audiobook_authors.csv' INTO TABLE audiobook_authors
+    FIELDS TERMINATED BY ','
+    OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 LINES
+    (contributor_id,ISBN);
+
+LOAD DATA LOCAL INFILE 'data/audiobook_purchases.csv' INTO TABLE audiobook_purchases
+    FIELDS TERMINATED BY ','
+    OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 LINES
+    (customer_id,ISBN,purchase_date);
+
 LOAD DATA LOCAL INFILE 'data/audiobook_reviews.csv' INTO TABLE audiobook_reviews
     FIELDS TERMINATED BY ','
     OPTIONALLY ENCLOSED BY '"'
     LINES TERMINATED BY '\n'
     IGNORE 1 LINES
     (customer_id,ISBN,rating,title,comment,verified);
+
+CREATE VIEW q1 AS
+    SELECT
+        person_id AS customer_id,
+        (SELECT concat(surname, ' ', middle_initials, ' ', forename) FROM person WHERE person.id = customer.person_id) as full_name,
+        email_address,
+        count(purchase_date) as books_purchased,
+        COALESCE(SUM((SELECT SUM(purchase_price) FROM audiobook WHERE audiobook.ISBN = audiobook_purchases.ISBN)), 0.00) as total_spent
+        FROM customer
+        LEFT JOIN audiobook_purchases ON customer.person_id = audiobook_purchases.customer_id
+        GROUP BY person_id ORDER BY total_spent DESC, full_name ASC;
+
+CREATE VIEW q2 AS
+    SELECT ISBN, title FROM audiobook WHERE ISBN NOT IN (SELECT ISBN FROM audiobook_purchases) ORDER BY title ASC;
+
+CREATE VIEW q3 AS
+    SELECT person_id as contributor_id,
+           (SELECT concat(surname, ' ', middle_initials, ' ', forename) FROM person WHERE person.id = contributor.person_id) as full_name,
+           GROUP_CONCAT(title ORDER BY title ASC) AS bought_and_contributed_to
+           FROM contributor, audiobook_purchases, audiobook
+           WHERE person_id = customer_id AND audiobook_purchases.ISBN = audiobook.ISBN
+           GROUP BY person_id ORDER BY contributor_id ASC;
