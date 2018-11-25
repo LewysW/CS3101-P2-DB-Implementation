@@ -12,6 +12,10 @@ SELECT
 --Query 2
 SELECT ISBN, title FROM audiobook WHERE ISBN NOT IN (SELECT ISBN FROM audiobook_purchases) ORDER BY title ASC;
 
-
 --Query 3
-SELECT person_id AS contributor_id FROM contributor WHERE contributor.person_id = audiobook.person_id;
+SELECT person_id as contributor_id,
+       (SELECT concat(surname, ' ', middle_initials, ' ', forename) FROM person WHERE person.id = contributor.person_id) as full_name,
+       GROUP_CONCAT(title ORDER BY title ASC) AS bought_and_contributed_to
+       FROM contributor, audiobook_purchases, audiobook
+       WHERE person_id = customer_id AND audiobook_purchases.ISBN = audiobook.ISBN
+       GROUP BY person_id ORDER BY contributor_id ASC;
