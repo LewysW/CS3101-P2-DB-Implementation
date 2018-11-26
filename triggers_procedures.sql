@@ -33,3 +33,40 @@ BEGIN
 END
 $$
 DELIMITER ;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS insertCustomer;
+CREATE PROCEDURE insertCustomer(
+    IN ID INTEGER, IN forename VARCHAR(50),
+    IN midInitials VARCHAR(10), IN surname VARCHAR(50),
+    IN dob DATE, IN email VARCHAR(320)
+)
+BEGIN
+    INSERT INTO person VALUES (ID, forename, midInitials, surname, dob);
+
+    IF EXISTS (SELECT id FROM person WHERE id = ID)
+    THEN
+        INSERT INTO customer VALUES (id, email);
+    ELSE
+        SIGNAL sqlstate '45001' set message_text = "Invalid credentials, failed to insert as customer.";
+    END IF;
+END
+
+DROP PROCEDURE IF EXISTS insertContributor;
+CREATE PROCEDURE insertContributor(
+    IN ID INTEGER, IN forename VARCHAR(50),
+    IN midInitials VARCHAR(10), IN surname VARCHAR(50),
+    IN dob DATE, IN biography VARCHAR(2500)
+)
+BEGIN
+    INSERT INTO person VALUES (ID, forename, midInitials, surname, dob);
+
+    IF EXISTS (SELECT id FROM person WHERE id = ID)
+    THEN
+        INSERT INTO contributor VALUES (id, biography);
+    ELSE
+        SIGNAL sqlstate '45001' set message_text = "Invalid credentials, failed to insert as contributor.";
+    END IF;
+END
+$$
+DELIMITER ;
