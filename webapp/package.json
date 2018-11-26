@@ -1,0 +1,29 @@
+{
+  "name": "webapp",
+  "version": "1.0.0",
+  "description": "Web app to serve database query data to front end.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LewysW/CS3101-P2-DB-Implementation.git"
+  },
+  "keywords": [
+    "JS",
+    "SQL",
+    "Node.js",
+    "Express.js"
+  ],
+  "author": "locw (160001362)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LewysW/CS3101-P2-DB-Implementation/issues"
+  },
+  "homepage": "https://github.com/LewysW/CS3101-P2-DB-Implementation#readme",
+  "dependencies": {
+    "express": "^4.16.4",
+    "mysql": "^2.16.0"
+  }
+}
