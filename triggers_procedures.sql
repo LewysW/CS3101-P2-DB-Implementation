@@ -42,7 +42,10 @@ CREATE PROCEDURE insertCustomer(
     IN dob DATE, IN email VARCHAR(320)
 )
 BEGIN
-    INSERT INTO person VALUES (ID, forename, midInitials, surname, dob);
+    IF NOT EXISTS (SELECT id FROM person WHERE id = ID)
+    THEN
+        INSERT INTO person VALUES (ID, forename, midInitials, surname, dob);
+    END IF;
 
     IF EXISTS (SELECT id FROM person WHERE id = ID)
     THEN
@@ -51,7 +54,10 @@ BEGIN
         SIGNAL sqlstate '45001' set message_text = "Invalid credentials, failed to insert as customer.";
     END IF;
 END
+$$
+DELIMITER ;
 
+DELIMITER $$
 DROP PROCEDURE IF EXISTS insertContributor;
 CREATE PROCEDURE insertContributor(
     IN ID INTEGER, IN forename VARCHAR(50),
@@ -59,7 +65,11 @@ CREATE PROCEDURE insertContributor(
     IN dob DATE, IN biography VARCHAR(2500)
 )
 BEGIN
-    INSERT INTO person VALUES (ID, forename, midInitials, surname, dob);
+
+    IF NOT EXISTS (SELECT id FROM person WHERE id = ID)
+    THEN
+        INSERT INTO person VALUES (ID, forename, midInitials, surname, dob);
+    END IF;
 
     IF EXISTS (SELECT id FROM person WHERE id = ID)
     THEN
