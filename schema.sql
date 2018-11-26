@@ -231,9 +231,9 @@ CREATE VIEW q2 AS
     SELECT ISBN, title FROM audiobook WHERE ISBN NOT IN (SELECT ISBN FROM audiobook_purchases) ORDER BY title ASC;
 
 CREATE VIEW q3 AS
-    SELECT person_id as contributor_id,
-           (SELECT concat(surname, ' ', middle_initials, ' ', forename) FROM person WHERE person.id = contributor.person_id) as full_name,
-           GROUP_CONCAT(title ORDER BY title ASC) AS bought_and_contributed_to
-           FROM contributor, audiobook_purchases, audiobook
-           WHERE person_id = customer_id AND audiobook_purchases.ISBN = audiobook.ISBN
-           GROUP BY person_id ORDER BY contributor_id ASC;
+    SELECT person_id as customer_id,
+           (SELECT concat(surname, ' ', middle_initials, ' ', forename) FROM person WHERE person.id = person_id) as full_name,
+           GROUP_CONCAT(DISTINCT title ORDER BY title ASC) as bought_and_contributed_to
+           FROM contributor, audiobook_purchases NATURAL JOIN audiobook_authors NATURAL JOIN audiobook
+           WHERE (person_id = audiobook_authors.contributor_id OR person_id = audiobook.narrator_id) AND person_id = audiobook_purchases.customer_id
+           GROUP BY person_id ORDER BY customer_id ASC;
