@@ -14,6 +14,7 @@ var connection = mysql.createConnection({
   database : 'locw_bookstream'
 });
 
+//Connect to database
 connection.connect( function(err) {
     if (err) {
         console.log('Error connecting to DB');
@@ -29,10 +30,12 @@ app.get('/', (req, res) => res.sendFile(path.join(__dirname + '/ui' + '/index.ht
 //Sends results of q1 view to user
 app.get('/customers', (req, res) =>  {
     connection.query('SELECT * FROM q1', function(err, rows, fields) {
+        //If error then return
         if (err) {
             console.log('Error executing query');
             return res.send();
         }
+        //Otherwise construct page for view q2 and send to user
         res.setHeader('Content-Type', 'text/html');
         res.write('<h1>Customers</h1>');
         res.write('<br>');
@@ -61,10 +64,12 @@ app.get('/customers', (req, res) =>  {
 //Sends results of q2 view to user
 app.get('/not_purchased', (req, res) =>  {
     connection.query('SELECT * FROM q2', function(err, rows, fields) {
+        //If error then return
         if (err) {
             console.log('Error executing query');
             return res.send();
         }
+        //Otherwise construct page for view q2 and send to user
         res.setHeader('Content-Type', 'text/html');
         res.write('<h1>Not Yet Purchased</h1>');
         res.write('<br>');
@@ -87,10 +92,12 @@ app.get('/not_purchased', (req, res) =>  {
 //Sends results of q3 view to user
 app.get('/contributor_purchases', (req, res) =>  {
     connection.query('SELECT * FROM q3', function(err, rows, fields) {
+        //If error then return
         if (err) {
             console.log('Error executing query');
             return res.send();
         }
+        //Otherwise construct results of view q3 and send to user as html
         res.setHeader('Content-Type', 'text/html');
         res.write('<h1>Contributor Purchases</h1>');
         res.write('<br>');
@@ -111,15 +118,19 @@ app.get('/contributor_purchases', (req, res) =>  {
     });
 });
 
-//Displays all audiobooks to user
+//Displays all audiobooks in the database to the user
 app.get('/audiobooks', (req, res) => {
-    connection.query('SELECT * FROM audiobook AS audibook', function (err, rows, fields) {
+    connection.query('SELECT * FROM audiobook', function (err, rows, fields) {
+        var contributor;
+        connection.query('SELECT contributor')
+
+        //If an error occurs return.
         if (err) {
             console.log('Error executing query');
             return res.send();
         }
 
-        console.log(rows);
+        //Otherwise construct page with audiobook data and send to user
         res.setHeader('Content-Type', 'text/html');
         res.write('<h1>Audiobooks</h1>');
         res.write('<br>');
@@ -144,7 +155,7 @@ app.get('/audiobooks', (req, res) => {
             res.write('<th>' + rows[i].narrator_id + '</th>');
             res.write('<th>' + rows[i].running_time + '</th>');
             res.write('<th>' + rows[i].age_rating + '</th>');
-            res.write('<th>' + rows[i].purchase_price + '</th>');
+            res.write('<th>$' + rows[i].purchase_price + '</th>');
             res.write('<th>' + rows[i].publisher_name + '</th>');
             res.write('<th>' + rows[i].published_date + '</th>');
             res.write('<th>' + rows[i].audiofile + '</th>');
@@ -164,21 +175,26 @@ app.use(function(req, res, next) {
     var queryUrl = url.parse(req.url, true);
     var queryStr = unescape(queryUrl.path);
 
+    //Checks if not a request for a review, if so returns 404 page
     if (queryStr.startsWith('/reviews/') == false) {
         console.log(queryStr);
         res.status(404);
         return res.sendFile(path.join(__dirname + '/ui' + '/404.html'));
     }
 
+    //Removes preceding string from request audiobook
     queryStr = queryStr.replace("/reviews/", "");
 
+    //Queries database for all reviews of requested audiobook
     connection.query(`SELECT * FROM audiobook_reviews WHERE (SELECT ISBN FROM audiobook WHERE audiobook.title = ${mysql.escape(queryStr)}) = audiobook_reviews.ISBN`, function(err, rows){
+            //If query is empty or error occurs then return page with message.
             if (rows.length == 0 || err) {
                 res.setHeader('Content-Type', 'text/html');
                 res.write('<h1>There are currently no reviews for "' + queryStr + '"</h1>');
                 return res.send();
             }
 
+            //Otherwise build HTML page with review content for audio book
             res.setHeader('Content-Type', 'text/html');
             res.write('<h1>Reviews for ' + queryStr + '</h1>');
             res.write('<br>');
@@ -211,4 +227,4 @@ app.use(function(req, res, next) {
         });
 });
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+app.listen(port, () => console.log(`Listening on port ${port}!`))

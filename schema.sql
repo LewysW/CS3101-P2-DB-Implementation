@@ -214,7 +214,7 @@ LOAD DATA LOCAL INFILE 'data/audiobook_reviews.csv' INTO TABLE audiobook_reviews
     (customer_id,ISBN,rating,title,comment,verified);
 
 /**
-VIEWS OF
+VIEWS
 **/
 CREATE VIEW q1 AS
     SELECT
