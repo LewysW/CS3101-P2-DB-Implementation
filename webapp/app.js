@@ -43,6 +43,7 @@ app.get('/customers', (req, res) =>  {
         res.write('<th>Email Address</th>');
         res.write('<th>Number of Books Purchased</th>');
         res.write('<th>Total Amount Spent</th>');
+        res.write('</tr>')
 
         for (var i = 0; i < rows.length; i++) {
             res.write('<tr>');
@@ -51,8 +52,8 @@ app.get('/customers', (req, res) =>  {
             res.write('<th>' + rows[i].email_address + '</th>');
             res.write('<th>' + rows[i].books_purchased +'</th>');
             res.write('<th>' + rows[i].total_spent + '</th>');
+            res.write('</tr>')
         }
-        res.write('</tr>')
         return res.send();
     });
 });
@@ -71,13 +72,14 @@ app.get('/not_purchased', (req, res) =>  {
         res.write('<tr>');
         res.write('<th>ISBN</th>');
         res.write('<th>Title</th>');
+        res.write('</tr>')
 
         for (var i = 0; i < rows.length; i++) {
             res.write('<tr>');
             res.write('<th>' + rows[i].ISBN + '</th>');
             res.write('<th>' + rows[i].title + '</th>');
+            res.write('</tr>')
         }
-        res.write('</tr>')
         return res.send();
     });
 });
@@ -103,8 +105,8 @@ app.get('/contributor_purchases', (req, res) =>  {
             res.write('<th>' + rows[i].customer_id + '</th>');
             res.write('<th>' + rows[i].full_name + '</th>');
             res.write('<th>' + rows[i].bought_and_contributed_to+ '</th>');
+            res.write('</tr>')
         }
-        res.write('</tr>')
         return res.send();
     });
 });
@@ -133,11 +135,12 @@ app.get('/audiobooks', (req, res) => {
         res.write('<th>Publisher Name</th>');
         res.write('<th>Date Published</th>');
         res.write('<th>Audio File</th>');
+        res.write('</tr>')
 
         for (var i = 0; i < rows.length; i++) {
             res.write('<tr>');
             res.write('<th>' + rows[i].ISBN + '</th>');
-            res.write('<th>' + '<a href = "http://localhost:3000/' + rows[i].title + '">' + rows[i].title + '</a>'  + '</th>');
+            res.write('<th>' + '<a href = "http://localhost:3000/reviews/' + rows[i].title + '">' + rows[i].title + '</a>'  + '</th>');
             res.write('<th>' + rows[i].narrator_id + '</th>');
             res.write('<th>' + rows[i].running_time + '</th>');
             res.write('<th>' + rows[i].age_rating + '</th>');
@@ -145,24 +148,35 @@ app.get('/audiobooks', (req, res) => {
             res.write('<th>' + rows[i].publisher_name + '</th>');
             res.write('<th>' + rows[i].published_date + '</th>');
             res.write('<th>' + rows[i].audiofile + '</th>');
+            res.write('</tr>')
         }
-        res.write('</tr>')
         return res.send();
     });
 });
 
-//Displays reviews of audiobok to user if they exist, otherwise returns the 404 page
+/*
+Checks if request for a review, if not returns 404 page.
+If request is for a review, checks to see if there are any reviews for request audiobook
+and returns the reviews if there are, returning message to user if there are not
+*/
 app.use(function(req, res, next) {
     var url = require('url');
     var queryUrl = url.parse(req.url, true);
     var queryStr = unescape(queryUrl.path);
-    queryStr = queryStr.replace("/", "");
+
+    if (queryStr.startsWith('/reviews/') == false) {
+        console.log(queryStr);
+        res.status(404);
+        return res.sendFile(path.join(__dirname + '/ui' + '/404.html'));
+    }
+
+    queryStr = queryStr.replace("/reviews/", "");
 
     connection.query(`SELECT * FROM audiobook_reviews WHERE (SELECT ISBN FROM audiobook WHERE audiobook.title = ${mysql.escape(queryStr)}) = audiobook_reviews.ISBN`, function(err, rows){
             if (rows.length == 0 || err) {
-                console.log(queryStr);
-                res.status(404);
-                return res.sendFile(path.join(__dirname + '/ui' + '/404.html'));
+                res.setHeader('Content-Type', 'text/html');
+                res.write('<h1>There are currently no reviews for "' + queryStr + '"</h1>');
+                return res.send();
             }
 
             res.setHeader('Content-Type', 'text/html');
@@ -177,6 +191,7 @@ app.use(function(req, res, next) {
             res.write('<th>Review Title</th>');
             res.write('<th>Comment</th>');
             res.write('<th>Verified</th>');
+            res.write('</tr>')
 
             for (var i = 0; i < rows.length; i++) {
                 res.write('<tr>');
@@ -190,8 +205,8 @@ app.use(function(req, res, next) {
                 } else {
                     res.write('<th>No</th>');
                 }
+                res.write('</tr>')
             }
-            res.write('</tr>')
             return res.send();
         });
 });
