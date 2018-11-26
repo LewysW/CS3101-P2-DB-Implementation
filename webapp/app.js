@@ -2,7 +2,7 @@
 //https://expressjs.com/en/starter/hello-world.html
 const express = require('express')
 const app = express()
-const port = 3000
+const port = 20571
 var path = require('path');
 
 //https://expressjs.com/en/guide/database-integration.html#mysql
